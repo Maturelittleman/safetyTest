@@ -205,10 +205,56 @@ button{font-family:inherit;cursor:pointer;border:none;background:none;color:inhe
 .chip.on{background:linear-gradient(135deg,var(--accent),var(--accent2));color:#fff;border-color:transparent;box-shadow:0 8px 20px -10px var(--accent)}
 .chip .cn{opacity:.55;font-weight:400;font-size:11px;margin-left:6px}
 .basis{margin-top:8px;padding-top:8px;border-top:1px dashed var(--line2);font-size:12.5px;line-height:1.55;opacity:.9}
+/* ---------- login / account ---------- */
+.login-screen{position:fixed;inset:0;z-index:80;display:flex;align-items:center;justify-content:center;padding:18px;
+  background:
+    radial-gradient(1200px 600px at 12% -8%, rgba(255,122,69,.12), transparent 60%),
+    radial-gradient(900px 500px at 100% 0%, rgba(99,140,210,.10), transparent 55%),
+    var(--bg);
+  background-attachment:fixed}
+.login-card{width:100%;max-width:384px;background:var(--surface);border:1px solid var(--line);border-radius:22px;
+  padding:28px 24px;box-shadow:var(--shadow);text-align:center}
+.login-logo{width:54px;height:54px;border-radius:16px;margin:0 auto 14px;display:grid;place-items:center;
+  background:linear-gradient(140deg,var(--accent),var(--accent2));color:#fff;font-weight:800;font-size:24px;
+  box-shadow:0 10px 26px -10px var(--accent)}
+.login-card h2{font-size:18px;margin:0 0 6px;font-weight:800}
+.login-sub{color:var(--muted);font-size:13px;margin:0 0 18px}
+.login-tabs{display:flex;gap:6px;background:var(--surface2);border:1px solid var(--line);border-radius:12px;padding:4px;margin-bottom:14px}
+.ltab{flex:1;padding:9px;border-radius:9px;font-size:14px;font-weight:600;color:var(--muted);transition:.2s}
+.ltab.on{background:var(--accent);color:#fff}
+.login-input{width:100%;padding:13px 14px;margin-bottom:10px;border-radius:13px;border:1px solid var(--line);
+  background:var(--bg2);color:var(--text);font-size:15px;font-family:inherit}
+.login-input:focus{outline:none;border-color:var(--accent)}
+.login-err{min-height:18px;color:var(--bad);font-size:12.5px;margin-bottom:6px;text-align:left}
+.login-submit{width:100%;margin-top:4px;padding:14px}
+.login-note{color:var(--faint);font-size:11.5px;margin:14px 0 0;line-height:1.5}
+.userpill{display:flex;align-items:center;gap:6px;padding:8px 13px;border-radius:999px;border:1px solid var(--line);
+  background:var(--surface);color:var(--muted);font-size:13px;font-weight:600;transition:.2s;flex:none}
+.userpill:hover{color:var(--text);border-color:var(--line2);transform:translateY(-1px)}
 @media (prefers-reduced-motion:reduce){*{animation:none!important;transition:none!important}}
 </style>
 </head>
 <body>
+
+<!-- LOGIN -->
+<section id="loginScreen" class="login-screen">
+  <div class="login-card">
+    <div class="login-logo">陕</div>
+    <h2>陕西省安管人员 · 安全生产考核</h2>
+    <p class="login-sub">登录账号以保存你的练习进度（保存在本设备浏览器）</p>
+    <div class="login-tabs">
+      <button class="ltab on" data-tab="login">登录</button>
+      <button class="ltab" data-tab="reg">注册</button>
+    </div>
+    <div class="login-err" id="loginErr"></div>
+    <input class="login-input" id="luUser" placeholder="用户名" autocomplete="username" maxlength="20">
+    <input class="login-input" id="luPwd" type="password" placeholder="密码" autocomplete="current-password">
+    <input class="login-input hidden" id="luPwd2" type="password" placeholder="确认密码" autocomplete="new-password">
+    <button class="btn primary login-submit" id="luSubmit">登录</button>
+    <p class="login-note">多账号仅保存在本设备浏览器，切换设备不互通；密码仅做本地加密存储，请勿用于重要账户。</p>
+  </div>
+</section>
+
 <div class="wrap">
 
   <!-- HOME -->
@@ -221,6 +267,7 @@ button{font-family:inherit;cursor:pointer;border:none;background:none;color:inhe
           <p>A类 / C1类 / C2类 / 安全生产知识</p>
         </div>
       </div>
+      <button class="userpill" id="userBtn" title="账号">👤</button>
       <button class="icon-btn" id="themeBtn" title="切换主题">🌓</button>
     </div>
 
@@ -336,6 +383,16 @@ button{font-family:inherit;cursor:pointer;border:none;background:none;color:inhe
   </div>
 </div>
 
+<!-- ACCOUNT MODAL -->
+<div class="mask" id="accMask">
+  <div class="sheet-modal" style="max-width:360px;text-align:center">
+    <h3>当前账号</h3>
+    <p class="sub" id="accName"></p>
+    <button class="btn primary" id="accLogout" style="width:100%;margin-bottom:10px">退出登录</button>
+    <button class="btn" id="accClose" style="width:100%">取消</button>
+  </div>
+</div>
+
 <div class="toast" id="toast"></div>
 
 <script>
@@ -350,17 +407,43 @@ const DATA = {"meta":{"title":"陕西省安管人员安全生产考核题库","s
   const pool = ()=> state.cat==="all" ? QS : QS.filter(q=>q.category===state.cat);
   const TYPE_INFO = {single:{name:"单选题",n:4}, multiple:{name:"多选题",n:4}, judge:{name:"判断题",n:2}};
   const SINGLE_LETTERS = ["A","B","C","D","E","F"];
-  const PROGRESS_KEY = "anbao_progress_v2";
-  const FAV_KEY = "anbao_fav_v2";
+  const ACC_KEY = "anbao_accounts_v1";
+  const SESSION_KEY = "anbao_session_v1";
+  const acctPk = u => "anbao_progress_v1_"+u;
+  const acctFk = u => "anbao_fav_v1_"+u;
 
-  let progress = load(PROGRESS_KEY, {});   // {qid:{sel, correct}}
-  let favs = load(FAV_KEY, {});            // {qid:true}
+  let currentUser = null;
+  let progress = {};   // {qid:{sel, correct}}
+  let favs = {};       // {qid:true}
 
   let state = { order:[], idx:0, mode:"seq", exam:false, examEnd:0, timer:null, session:{}, cat:"all" };
 
   /* ---------- storage ---------- */
   function load(k, def){ try{ return JSON.parse(localStorage.getItem(k)) || def; }catch(e){ return def; } }
-  function save(){ localStorage.setItem(PROGRESS_KEY, JSON.stringify(progress)); localStorage.setItem(FAV_KEY, JSON.stringify(favs)); }
+  function save(){
+    if(!currentUser) return;
+    localStorage.setItem(acctPk(currentUser), JSON.stringify(progress));
+    localStorage.setItem(acctFk(currentUser), JSON.stringify(favs));
+  }
+  function getAccounts(){ return load(ACC_KEY, []); }
+  function saveAccounts(a){ localStorage.setItem(ACC_KEY, JSON.stringify(a)); }
+  function hashPwd(s){ let h=5381; for(let i=0;i<s.length;i++){ h=(((h<<5)+h)+s.charCodeAt(i))>>>0; } return "h"+h.toString(16); }
+  function updateUserBtn(){ const b=$("#userBtn"); if(b) b.textContent = currentUser ? ("👤 "+currentUser) : "👤"; }
+  function loadUser(u){
+    currentUser = u;
+    progress = load(acctPk(u), {});
+    favs = load(acctFk(u), {});
+    localStorage.setItem(SESSION_KEY, u);
+    updateUserBtn();
+  }
+  function migrateLegacyTo(u){
+    const lp = localStorage.getItem("anbao_progress_v2");
+    const lf = localStorage.getItem("anbao_fav_v2");
+    if(lp!==null){ localStorage.setItem(acctPk(u), lp); localStorage.removeItem("anbao_progress_v2"); }
+    if(lf!==null){ localStorage.setItem(acctFk(u), lf); localStorage.removeItem("anbao_fav_v2"); }
+    progress = load(acctPk(u), {});
+    favs = load(acctFk(u), {});
+  }
 
   /* ---------- theme ---------- */
   const themeBtn = $("#themeBtn");
@@ -370,6 +453,63 @@ const DATA = {"meta":{"title":"陕西省安管人员安全生产考核题库","s
     localStorage.setItem("anbao_a_theme", t);
   };
   (function(){ const t = localStorage.getItem("anbao_a_theme"); if(t) document.documentElement.setAttribute("data-theme", t); })();
+
+  /* ---------- auth (multi-user local accounts) ---------- */
+  function showLogin(){
+    $("#home").classList.add("hidden"); $("#quiz").classList.add("hidden");
+    $("#loginScreen").classList.remove("hidden");
+    $("#loginErr").textContent = "";
+    setTimeout(()=>{ const el=$("#luUser"); if(el) el.focus(); }, 50);
+  }
+  function hideLogin(){ $("#loginScreen").classList.add("hidden"); }
+
+  let loginTab = "login";
+  $("#loginScreen").querySelectorAll(".ltab").forEach(t=>{
+    t.onclick = ()=>{
+      loginTab = t.dataset.tab;
+      $("#loginScreen").querySelectorAll(".ltab").forEach(x=>x.classList.toggle("on", x===t));
+      $("#luPwd2").classList.toggle("hidden", loginTab!=="reg");
+      $("#luSubmit").textContent = loginTab==="reg" ? "注册并登录" : "登录";
+      $("#loginErr").textContent = "";
+    };
+  });
+  function doAuth(){
+    const u = $("#luUser").value.trim();
+    const p = $("#luPwd").value;
+    const err = $("#loginErr");
+    if(!u || !p){ err.textContent = "请输入用户名和密码"; return; }
+    const accounts = getAccounts();
+    if(loginTab==="reg"){
+      if(p.length<4){ err.textContent = "密码至少 4 位"; return; }
+      if(accounts.some(a=>a.user===u)){ err.textContent = "该用户名已存在"; return; }
+      if($("#luPwd2").value !== p){ err.textContent = "两次密码不一致"; return; }
+      accounts.push({user:u, hash:hashPwd(p)});
+      saveAccounts(accounts);
+      migrateLegacyTo(u);
+      loadUser(u);
+      hideLogin(); renderHome(); toast("注册成功，已登录");
+    } else {
+      const acc = accounts.find(a=>a.user===u);
+      if(!acc || acc.hash!==hashPwd(p)){ err.textContent = "用户名或密码错误"; return; }
+      loadUser(u); hideLogin(); renderHome();
+    }
+  }
+  $("#luSubmit").onclick = doAuth;
+  ["luUser","luPwd","luPwd2"].forEach(id=>{
+    const el = $("#"+id); if(el) el.addEventListener("keydown", e=>{ if(e.key==="Enter") doAuth(); });
+  });
+
+  // account management (logout)
+  const accMask = $("#accMask");
+  $("#userBtn").onclick = ()=>{ $("#accName").textContent = currentUser || ""; accMask.classList.add("show"); };
+  $("#accClose").onclick = ()=> accMask.classList.remove("show");
+  accMask.onclick = e=>{ if(e.target===accMask) accMask.classList.remove("show"); };
+  $("#accLogout").onclick = ()=>{
+    localStorage.removeItem(SESSION_KEY);
+    currentUser = null; progress = {}; favs = {};
+    accMask.classList.remove("show");
+    showLogin();
+  };
 
   /* ---------- home ---------- */
   function renderHome(){
@@ -700,7 +840,13 @@ const DATA = {"meta":{"title":"陕西省安管人员安全生产考核题库","s
     }
   });
 
-  renderHome();
+  /* ---------- boot ---------- */
+  (function boot(){
+    const sess = localStorage.getItem(SESSION_KEY);
+    const accounts = getAccounts();
+    if(sess && accounts.some(a=>a.user===sess)){ loadUser(sess); renderHome(); }
+    else { showLogin(); }
+  })();
 })();
 </script>
 </body>
