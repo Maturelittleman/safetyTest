@@ -246,7 +246,7 @@ button{font-family:inherit;cursor:pointer;border:none;background:none;color:inhe
     <input class="login-input" id="luUser" placeholder="用户名" autocomplete="username" maxlength="20">
     <input class="login-input" id="luPwd" type="password" placeholder="密码" autocomplete="current-password">
     <button class="btn primary login-submit" id="luSubmit">登录</button>
-    <p class="login-note">练习进度、收藏、错题按账号保存在本设备浏览器；切换设备不互通。如需新账号，请联系管理员在后台表格中添加。</p>
+    <p class="login-note">练习进度、收藏、错题按账号保存在本设备浏览器；切换设备不互通。如需新账号，请联系管理员15384540528进行添加。</p>
   </div>
 </section>
 
@@ -448,13 +448,24 @@ const ACCOUNTS = [{"user":"admin","hash":"hffdd99dc"}];
   }
   function hideLogin(){ $("#loginScreen").classList.add("hidden"); }
 
+  const ADMIN_PHONE = "15384540528";
   function doAuth(){
     const u = $("#luUser").value.trim();
     const p = $("#luPwd").value;
     const err = $("#loginErr");
     if(!u || !p){ err.textContent = "请输入用户名和密码"; return; }
     const acc = ACCOUNTS.find(a=>a.user===u);
-    if(!acc || acc.hash!==hashPwd(p)){ err.textContent = "用户名或密码错误"; return; }
+    if(!acc || acc.hash!==hashPwd(p)){
+      let fails = Number(localStorage.getItem("anbao_login_fails")||0) + 1;
+      localStorage.setItem("anbao_login_fails", fails);
+      if(fails >= 5){
+        err.innerHTML = "用户名或密码错误（已错误 "+fails+" 次）。如忘记账号或密码，请联系管理员 "+ADMIN_PHONE+" 修改。";
+      } else {
+        err.textContent = "用户名或密码错误" + (fails>1 ? "（已错误 "+fails+" 次）" : "");
+      }
+      return;
+    }
+    localStorage.setItem("anbao_login_fails", 0);
     loadUser(u); hideLogin(); renderHome();
   }
   $("#luSubmit").onclick = doAuth;
