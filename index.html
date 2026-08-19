@@ -53,7 +53,7 @@ button{font-family:inherit;cursor:pointer;border:none;background:none;color:inhe
 .icon-btn:hover{color:var(--text);border-color:var(--line2);transform:translateY(-1px)}
 
 /* ---------- home ---------- */
-.hero{padding:26px 22px;border-radius:24px;background:linear-gradient(150deg,var(--surface),var(--surface2));
+.hero{padding:0;border-radius:24px;background:linear-gradient(150deg,var(--surface),var(--surface2));
   border:1px solid var(--line);box-shadow:var(--shadow);position:relative;overflow:hidden;margin-bottom:18px}
 .hero::after{content:"";position:absolute;right:-40px;top:-40px;width:180px;height:180px;border-radius:50%;
   background:radial-gradient(circle,rgba(255,122,69,.22),transparent 70%)}
@@ -67,6 +67,28 @@ button{font-family:inherit;cursor:pointer;border:none;background:none;color:inhe
 .contact-banner .cb-ic{font-size:18px;flex:none}
 .contact-banner a{color:var(--accent2);font-weight:700;text-decoration:none;border-bottom:1px dashed currentColor}
 .contact-banner a:hover{opacity:.82}
+
+/* ---------- hero 广告轮播 ---------- */
+.hero-track{display:flex;width:100%;transition:transform .55s cubic-bezier(.16,1,.3,1)}
+.hero-slide{flex:0 0 100%;min-width:100%;max-width:100%;box-sizing:border-box;overflow-wrap:break-word;word-break:break-word;
+  display:flex;flex-direction:row;align-items:center;justify-content:space-between;gap:16px;
+  min-height:190px;padding:24px 22px;position:relative}
+.hero-main{flex:1;min-width:0;display:flex;flex-direction:column;align-items:flex-start}
+.hero-slide .qr{width:104px;height:104px;flex:none;border-radius:3px;
+  background:#fff;padding:3px;box-shadow:0 4px 14px rgba(0,0,0,.18);object-fit:contain;display:block;
+  -webkit-touch-callout:default;touch-action:manipulation;pointer-events:auto}
+@media (max-width:359px){
+  .hero-slide{gap:10px;padding:20px 14px}
+  .hero-slide .qr{width:82px;height:82px}
+  .hero h2{font-size:19px}
+  .hero-contact{font-size:13px}
+}
+.hero-contact{margin:0 0 10px;font-size:14.5px;font-weight:700;color:var(--accent2);letter-spacing:.3px}
+.hero-contact a{color:var(--accent2);font-weight:800;text-decoration:none;border-bottom:1px dashed currentColor}
+.hero-contact a:hover{opacity:.82}
+.hero-dots{position:absolute;left:0;right:0;bottom:11px;display:flex;justify-content:center;gap:6px;z-index:3}
+.hero-dots i{width:6px;height:6px;border-radius:99px;background:var(--line2);cursor:pointer;transition:.25s}
+.hero-dots i.on{width:18px;background:var(--accent)}
 
 .stats{display:grid;grid-template-columns:repeat(4,1fr);gap:10px;margin-bottom:18px}
 .stat{padding:14px 12px;border-radius:16px;background:var(--surface);border:1px solid var(--line);text-align:center}
@@ -269,6 +291,7 @@ button{font-family:inherit;cursor:pointer;border:none;background:none;color:inhe
 .login-note{color:var(--faint);font-size:11.5px;margin:14px 0 0;line-height:1.5}
 .userpill{display:flex;align-items:center;gap:6px;padding:8px 13px;border-radius:999px;border:1px solid var(--line);
   background:var(--surface);color:var(--muted);font-size:13px;font-weight:600;transition:.2s;flex:none}
+.userpill .up-ic{display:inline-flex;flex:none;line-height:0}
 .userpill:hover{color:var(--text);border-color:var(--line2);transform:translateY(-1px)}
 @media (prefers-reduced-motion:reduce){*{animation:none!important;transition:none!important}}
 </style>
@@ -301,14 +324,40 @@ button{font-family:inherit;cursor:pointer;border:none;background:none;color:inhe
           <p>祝考生顺利上岸</p>
         </div>
       </div>
-      <button class="userpill" id="userBtn" title="账号">👤</button>
+      <button class="userpill" id="userBtn" title="账号"><span class="up-ic"><svg viewBox="0 0 24 24" width="15" height="15" fill="var(--accent)" aria-hidden="true"><path d="M12 12a4 4 0 1 0 0-8 4 4 0 0 0 0 8zm0 2c-3.4 0-8 1.7-8 5v2h16v-2c0-3.3-4.6-5-8-5z"/></svg></span></button>
       <button class="icon-btn" id="themeBtn" title="切换主题">🌓</button>
     </div>
 
-    <div class="hero">
-      <span class="tag">● 驾考模式 · 看图答题</span>
-      <h2>像考驾照一样练题，<br>逢错即纠，稳过考核</h2>
-      <p>顺序 / 随机 / 专项练习，模拟考试计时评分，自动收录错题与收藏，进度本地保存。</p>
+    <div class="hero" id="heroBox">
+      <div class="hero-track" id="heroTrack">
+        <div class="hero-slide">
+          <div class="hero-main">
+            <span class="tag">🏗️ 资质服务</span>
+            <h2>企业资质规划、落地，政策咨询</h2>
+            <div class="hero-contact">请联系管理员（同微信）：<a href="tel:15384540528">15384540528</a></div>
+            <p>施工资质、设计资质、承装修试电力许可证等</p>
+          </div>
+          <img class="qr" src="imgs/qr.jpg" alt="微信二维码">
+        </div>
+        <div class="hero-slide">
+          <div class="hero-main">
+            <span class="tag">● 驾考模式 · 看图答题</span>
+            <h2>像考驾照一样练题，<br>逢错即纠，稳过考核</h2>
+            <p>顺序 / 随机 / 专项练习，模拟考试计时评分，自动收录错题与收藏，进度本地保存。</p>
+          </div>
+          <img class="qr" src="imgs/qr.jpg" alt="微信二维码">
+        </div>
+        <div class="hero-slide">
+          <div class="hero-main">
+            <span class="tag">📋 业务范围</span>
+            <h2>施工资质、设计资质、承装修试电力许可证等</h2>
+            <div class="hero-contact">请联系管理员（同微信）：<a href="tel:15384540528">15384540528</a></div>
+            <p>企业资质规划 · 落地代办 · 政策咨询</p>
+          </div>
+          <img class="qr" src="imgs/qr.jpg" alt="微信二维码">
+        </div>
+      </div>
+      <div class="hero-dots" id="heroDots"></div>
     </div>
 
     <div class="contact-banner">
@@ -547,7 +596,7 @@ const ACCOUNTS = [{"user":"admin","hash":"h7c785255","type":"S"},{"user":"admina
   let progress = {};   // {qid:{sel, correct}}
   let favs = {};       // {qid:true}
 
-  let state = { order:[], idx:0, mode:"seq", exam:false, examEnd:0, timer:null, session:{}, cat:"all", examTypeKey:null, examScores:{}, jingzhun: localStorage.getItem("anbao_jingzhun")==="1" };
+  let state = { order:[], idx:0, mode:"seq", exam:false, examEnd:0, timer:null, session:{}, cat:"all", examTypeKey:null, examScores:{}, jingzhun: localStorage.getItem("anbao_jingzhun") !== "0" };
 
   /* ---------- storage ---------- */
   function load(k, def){ try{ return JSON.parse(localStorage.getItem(k)) || def; }catch(e){ return def; } }
@@ -557,7 +606,7 @@ const ACCOUNTS = [{"user":"admin","hash":"h7c785255","type":"S"},{"user":"admina
     localStorage.setItem(acctFk(currentUser), JSON.stringify(favs));
   }
   function hashPwd(s){ let h=5381; for(let i=0;i<s.length;i++){ h=(((h<<5)+h)+s.charCodeAt(i))>>>0; } return "h"+h.toString(16); }
-  function updateUserBtn(){ const b=$("#userBtn"); if(b) b.textContent = currentUser ? ("👤 "+currentUser) : "👤"; }
+  function updateUserBtn(){ const b=$("#userBtn"); if(b) b.innerHTML = '<span class="up-ic"><svg viewBox="0 0 24 24" width="15" height="15" fill="var(--accent)" aria-hidden="true"><path d="M12 12a4 4 0 1 0 0-8 4 4 0 0 0 0 8zm0 2c-3.4 0-8 1.7-8 5v2h16v-2c0-3.3-4.6-5-8-5z"/></svg></span>' + (currentUser ? " "+currentUser : ""); }
   function loadUser(u, type){
     currentUser = u;
     currentType = type || (effectiveAccounts().find(a=>a.user===u)||{}).type || "S";
@@ -1107,6 +1156,40 @@ const ACCOUNTS = [{"user":"admin","hash":"h7c785255","type":"S"},{"user":"admina
       else if(o && state.exam) onPick(q, o.key);
     }
   });
+
+  /* ---------- hero 广告轮播 ---------- */
+  const hTrack = $("#heroTrack");
+  if(hTrack){
+    const slides = hTrack.children.length;
+    const dotsWrap = $("#heroDots");
+    for(let i=0;i<slides;i++){
+      const d = document.createElement("i");
+      d.onclick = ()=>hgo(i);
+      dotsWrap.appendChild(d);
+    }
+    let hcur = 0, htimer = null;
+    function hgo(i){
+      hcur = (i + slides) % slides;
+      hTrack.style.transform = "translateX(-" + (hcur*100) + "%)";
+      Array.prototype.forEach.call(dotsWrap.children, (d,j)=> d.classList.toggle("on", j===hcur));
+    }
+    function hauto(){
+      clearInterval(htimer);
+      htimer = setInterval(()=>hgo(hcur+1), 4000);
+    }
+    const hbox = hTrack.parentElement;
+    let hsx = null;
+    hbox.addEventListener("touchstart", e=>{ hsx = e.touches[0].clientX; }, {passive:true});
+    hbox.addEventListener("touchend", e=>{
+      if(hsx === null) return;
+      const dx = e.changedTouches[0].clientX - hsx;
+      if(Math.abs(dx) > 40) hgo(hcur + (dx < 0 ? 1 : -1));
+      hsx = null; hauto();
+    }, {passive:true});
+    hbox.addEventListener("mouseenter", ()=> clearInterval(htimer));
+    hbox.addEventListener("mouseleave", hauto);
+    hgo(1); hauto();
+  }
 
   /* ---------- boot ---------- */
   (function boot(){
